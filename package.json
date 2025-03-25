@@ -14,9 +14,16 @@
   "contributes": {
     "commands": [
       {
-        "command": "cpp-helper.helloWorld",
-        "title": "Hello World"
-      }
+        "command": "cpp-helper.generateGetSet",
+        "title": "Generate C++ Getter and Setter"
+    }
+    ],
+    "keybindings": [
+        {
+            "command": "cpp-helper.generateGetSet",
+            "key": "ctrl+alt+g",
+            "when": "editorTextFocus"
+        }
     ]
   },
   "scripts": {

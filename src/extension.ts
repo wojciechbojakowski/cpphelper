@@ -1,26 +1,43 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+    let disposable = vscode.commands.registerCommand('cpp-helper.generateGetSet', async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage("Open a C++ file first!");
+            return;
+        }
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "cpp-helper" is now active!');
+        const selection = editor.selection;
+        const text = editor.document.getText(selection);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('cpp-helper.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from cpp-helper!');
-	});
+        if (!text) {
+            vscode.window.showErrorMessage("Select a variable to generate getter and setter.");
+            return;
+        }
 
-	context.subscriptions.push(disposable);
+        // Match variable declaration (e.g., int age;)
+        const match = text.match(/\b(\w+)\s+(\w+);/);
+        if (!match) {
+            vscode.window.showErrorMessage("Invalid variable declaration. Example: 'int age;'");
+            return;
+        }
+
+        const type = match[1];
+        const varName = match[2];
+        const capitalizedVar = varName.charAt(0).toUpperCase() + varName.slice(1);
+
+        // Generate getter and setter
+        const getterSetter = `\n    ${type} get${capitalizedVar}() const {\n        return ${varName};\n    }\n\n    void set${capitalizedVar}(const ${type}& value) {\n        ${varName} = value;\n    }\n`;
+
+        editor.edit(editBuilder => {
+            editBuilder.insert(selection.end, getterSetter);
+        });
+
+        vscode.window.showInformationMessage(`Getter and Setter for '${varName}' generated!`);
+    });
+
+    context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
